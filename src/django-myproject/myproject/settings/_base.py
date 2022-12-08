@@ -1,6 +1,19 @@
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+import sys
+from myproject.apps.core.versioning import get_git_changeset_timestamp
+
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+)
+EXTERNAL_BASE = os.path.join(BASE_DIR, "externals")
+EXTERNAL_LIBS_PATH= os.path.join(BASE_DIR, "libs")
+EXTERNAL_APPS_PATH = os.path.join(BASE_DIR, "apps")
+sys.path = ["", EXTERNAL_LIBS_PATH, EXTERNAL_APPS_PATH] + sys.path
+
 
 def get_secret(setting):
     """Obtém a variavel sigilosam ou devolve uma exceção explicita."""
@@ -10,14 +23,6 @@ def get_secret(setting):
     except KeyError:
         error_msg = f'Set the {setting} environment variable'
         raise ImproperlyConfigured(error_msg)
-
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -126,12 +131,24 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'myproject', 'site_static'),
 ]
+
+timestamp = get_git_changeset_timestamp(BASE_DIR)
+STATIC_URL = f'/static/{timestamp}/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+with open(os.path.join(BASE_DIR, 'myproject', 'settings', 'last-update.txt'),'r') as f:timestamp = f.readline().strip()
+
+
+
+
+
+
 
 
 # Default primary key field type
